@@ -1,0 +1,22 @@
+# Lead Generation Automation Workflow
+
+A robust, automated lead enrichment pipeline built with n8n. This workflow automates the journey from raw keyword input to structured, actionable data stored in a centralized CRM.
+
+## Technical Workflow Overview
+
+The pipeline is designed for scalability and fault tolerance, featuring the following key stages:
+
+*   **Input Acquisition:** The workflow initiates by fetching target keywords from a Google Sheets document.
+*   **Data Scraping & Enrichment:** Utilizing targeted scraping nodes, the workflow gathers raw data based on the provided keywords.
+*   **AI Structured & Scored (LLM Node):** Raw data is passed to an LLM to extract key entities and apply a lead quality score based on predefined business criteria.
+*   **The "Healer" Logic:** A crucial intermediate step designed to handle structural inconsistencies. If the AI output fails schema validation, the "Healer" node attempts to sanitize and re-format the JSON payload, ensuring subsequent nodes do not fail due to malformed data.
+*   **Airtable Integration:** Once sanitized, the structured data is pushed to Airtable via the `Create Record` node for long-term storage and management.
+*   **Feedback Loop:** The workflow performs a final count of processed leads and writes the status back to the original Google Sheet, closing the loop and providing real-time visibility into the operation's progress.
+
+Token Optimization & Cost Efficiency:
+To maximize efficiency and reduce API costs, the workflow implements a batch-processing strategy. Instead of making individual API calls for each lead, the scraper consolidates multiple profiles into a single payload. By passing a bundled list to the LLM, the workflow minimizes overhead and significantly lowers token consumption per lead, allowing for large-scale data extraction on a budget.
+
+## Prerequisites
+*   n8n instance (Self-hosted via VPS/Easypanel recommended).
+*   API credentials for Google Sheets and Airtable.
+*   OpenAI or Anthropic API key for the AI processing nodes.
