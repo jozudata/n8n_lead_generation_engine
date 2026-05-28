@@ -1,0 +1,862 @@
+{
+  "name": "W5_ex3_Josue_Zuniga",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "organic_results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        496,
+        -16
+      ],
+      "id": "181ad640-f028-4552-a55b-07ef5139835c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9d8718c9-e023-49da-8409-a30360643a67",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "2880276c-5567-4949-b99c-0193582de1e5",
+              "name": "link",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -16
+      ],
+      "id": "6c0305e9-54a8-4f1b-a420-e6d5cfb3f9ba",
+      "name": "extract data"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        192
+      ],
+      "id": "66f1abf6-3b7d-4b11-91fb-529b847b8473",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bDl0fGCXXXXXXXXX",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"role\": \"CEO\",\n    \"company\": \"BioTech Industries\",\n    \"score\": 5,\n    \"link\": \"https://www.linkedin.com/in/johndoe\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        192
+      ],
+      "id": "92279e83-f890-4c9f-b5f2-7ec833aa26fb",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        -208
+      ],
+      "id": "d7397be6-6b6b-45b7-8db7-fbad97c57c2c",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        -208
+      ],
+      "id": "dac0d982-227a-419b-ae9b-b9bb6dac466f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1b933e39-7156-4d40-bb4b-c50445626ee8",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "pending",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        320
+      ],
+      "id": "c589d5d9-ecc8-49c3-beaa-3a446b97a911",
+      "name": "Filter"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        208,
+        320
+      ],
+      "id": "23c7a8a7-ef83-484a-9014-189cdb509310",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1904,
+        304
+      ],
+      "id": "5abd672b-ea2b-4aa9-b599-6dec57c3bf83",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -16
+      ],
+      "id": "ac7c4852-4d12-40fa-be4c-fe5a073cd8ef",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "=site:linkedin.com/in/ {{ $json.keywords }}"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "paginationMode": "responseContainsNextURL",
+              "nextURL": "={{$response.body.serpapi_pagination.next_link}}",
+              "limitPagesFetched": true,
+              "maxRequests": 4
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        352,
+        128
+      ],
+      "id": "f0ce05ce-1ed7-4145-846c-03e13b9a675c",
+      "name": "search_scraper",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "637JmG9XXXXXXXXX",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74ab38d7-1e23-4254-8076-183bff246be4",
+              "leftValue": "={{ \n  (() => {\n    // 1. Is it empty? If there is nothing, route to repair (False)\n    if (!$json) return false;\n\n    let datos = $json;\n\n    // 2. If the AI wrapped it inside a typical property (data, leads, output), unpack it\n    if (datos.data) datos = datos.data;\n    else if (datos.leads) datos = datos.leads;\n    else if (datos.output) datos = datos.output;\n\n    // 3. THE ACTUAL VALIDATION:\n    // If it is a list (Array), ensure it contains elements.\n    if (Array.isArray(datos)) {\n      return datos.length > 0;\n    }\n\n    // If it is an individual lead (Object), ensure it is valid.\n    return typeof datos === 'object' && datos !== null;\n  })()\n}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1312,
+        -192
+      ],
+      "id": "bced1771-1e5b-4f11-b45b-6b4054082b66",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=INPUT DATA:\n{{ JSON.stringify($json.data) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an expert data extraction and business intelligence assistant. Analyze the consolidated JSON array containing LinkedIn profile titles and links provided in the input.\n\nThe current target search query is: \"{{ $('Limit').itemMatching(0).json.keywords }}\"\n\nYour tasks are:\n\nExtract the key professional information for EACH individual profile object found in the input array.\n\nMaintain and pass through the original \"link\" value for each profile without any modifications.\n\nEvaluate the relevance of each profile against the search target/intent: \"{{ $('Limit').itemMatching(0).json.keywords }}\". Assign an integer \"score\" from 1 to 5 based on this scale:\n\n5: Perfect match (The profile explicitly holds a role/title and works in an industry or company type that perfectly matches the search query: \"{{ $('Limit').itemMatching(0).json.keywords }}\").\n\n4: Strong match (Holds a high-level leadership or director role in a closely related field or industry aligned with the query).\n\n3: Partial match (Matches either the role or the industry/keyword but not both perfectly, or has a generic title with unclear industry relevance).\n\n2: Low match (Mid-level role or marginally related title to the search query: \"{{ $('Limit').itemMatching(0).json.keywords }}\").\n\n1: Completely irrelevant, non-matching, or missing critical data.\n\nCRITICAL: Do NOT include any reasoning, explanation, or justification for the score. Return only the raw data.\n\nYou must strictly return a clean JSON Array of objects. Do not include any markdown formatting, do not wrap the response in ```json\n\nJSON Structure required:\n[\n  {\n    \"first_name\": \"Extract only the person's first name\",\n    \"last_name\": \"Extract only the person's last name/surname\",\n    \"role\": \"Extract their title, such as CEO, Founder, Co-founder, etc.\",\n    \"company\": \"Extract the name of the company\",\n    \"score\": 5,\n    \"link\": \"Pass through the exact URL link provided in the input object\"\n  }\n]\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1072,
+        -16
+      ],
+      "id": "5c48c48b-9bfd-4a28-a0d2-a4391cdbac5b",
+      "name": "AI structured & score"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Input Data to Fix: {{ JSON.stringify($json.output) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Role & Objective:\nYou are an expert Data Repair Engineer. Your sole responsibility is to salvage, sanitize, and structurally repair raw text or malformed JSON payloads generated by an upstream AI that failed validation. You must map the extracted information perfectly into the requested JSON schema.\n\nInput Context:\nThe user prompt contains a stringified version of the broken payload. This data may contain unescaped characters, missing commas, unbalanced brackets, truncation, or conversational text wrappers (e.g., \"Here is the JSON...\").\n\nStrict Operational Rules:\n1. DATA INTEGRITY: Extract the core lead information (names, roles, companies, scores, links). You are strictly forbidden from changing, altering, or modernizing any spelling, titles, or URLs. Keep the data exactly as originally intended.\n2. NO HALLUCINATIONS: If a specific data point (e.g., a last name or a link) is completely missing and unrecoverable from the text, set its value to an empty string (\"\"). Do not invent placeholders or fake profiles.\n3. REPAIR MECHANICS: Fix syntax anomalies such as trailing commas, unclosed brackets, or bad string escaping. Strip out any conversational preamble or postscript completely.\n4. SCORE PRESERVATION: Maintain the original qualification score (on a scale of 1 to 5). Do not recalculate or modify the score."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1424,
+        -16
+      ],
+      "id": "c6af631d-4f83-42aa-905e-6cc9b26aabd9",
+      "name": "AI Healer"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        192
+      ],
+      "id": "1065ed1f-c8b3-4a6b-aa22-d89485dd3281",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bDl0fGCXXXXXXXXX",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"role\": \"CEO\",\n    \"company\": \"BioTech Industries\",\n    \"score\": 5,\n    \"link\": \"https://www.linkedin.com/in/johndoe\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1600,
+        176
+      ],
+      "id": "9c418ef7-be90-42a6-a228-2824dbc08ea2",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1vtv05qHfcgejcO-XXXXXXXXXXXXXXXXXXXXXXXX",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "input",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vtv05qHfcgejcO-XXXXXXXXXXXXXXXXXXXXXXXX/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        32
+      ],
+      "id": "cbab6885-285e-4dd5-815a-64a1d1a867c9",
+      "name": "Get keywords",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "b1pZNzCiXXXXXXXX",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "=1vtv05qHfcgejcO-XXXXXXXXXXXXXXXXXXXXXXXX",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "input",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vtv05qHfcgejcO-XXXXXXXXXXXXXXXXXXXXXXXX/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "status": "={{ $json.airtable_status }}",
+            "leads_generated": "={{ $json.processed_leads_count }}",
+            "data_execution": "={{ $json.final_date }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "keywords",
+              "displayName": "keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_execution",
+              "displayName": "data_execution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "leads_generated",
+              "displayName": "leads_generated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2144,
+        80
+      ],
+      "id": "879ae431-34d7-4619-a292-1150e96c93c0",
+      "name": "Update status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "b1pZNzCiXXXXXXXX",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const totalLeads = $input.all().length;\nconst currentDate = new Date().toISOString().split('T')[0];\n\nreturn [{\n    json: {\n        airtable_status: \"done\",\n        processed_leads_count: totalLeads,\n        final_date: currentDate\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        64
+      ],
+      "id": "3358f638-5fbe-4a6b-a0dc-cb27447a3c88",
+      "name": "jscript(total leads)"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appXXXXXXXXXXXXXX",
+          "mode": "list",
+          "cachedResultName": "db_lkdn",
+          "cachedResultUrl": "https://airtable.com/appXXXXXXXXXXXXXX"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblXXXXXXXXXXXXXX",
+          "mode": "list",
+          "cachedResultName": "lkdn_dyna",
+          "cachedResultUrl": "https://airtable.com/appXXXXXXXXXXXXXX/tblXXXXXXXXXXXXXX"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "first_name": "={{ $json.first_name }}",
+            "last_name": "={{ $json.last_name }}",
+            "role": "={{ $json.role }}",
+            "company": "={{ $json.company }}",
+            "score": "={{ $json.score }}",
+            "link": "={{ $json.link }}",
+            "keywords": "={{ $(\"Limit\").itemMatching(0).json.keywords }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "role",
+              "displayName": "role",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "keywords",
+              "displayName": "keywords",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1984,
+        -208
+      ],
+      "id": "81486d11-e35c-49bd-92c9-ed6c4152c78e",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cPFWf4AXXXXXXXXX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "extract data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract data": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI structured & score",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI structured & score",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "search_scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Update status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI structured & score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search_scraper": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI structured & score": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Healer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Healer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Healer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Healer": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get keywords": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "jscript(total leads)": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "jscript(total leads)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "23840fbf-e753-407c-b9db-9f0b200bbf4f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "08e06c22d5a70933XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  "id": "9QGlsoFux8q8lqS7",
+  "tags": []
+}
